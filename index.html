@@ -47,7 +47,7 @@
         .item-val { font-weight: bold; color: #111; text-align: right; word-break: break-word;}
         .status-alert { color: #d9534f; }
         .status-warn { color: #d39e00; }
-        .status-success { color: #28a745; font-size: 14px; }
+        .status-success { color: #28a745; font-weight: bold; }
         .truck-list-img { display: flex; flex-direction: column; width: 100%; margin-top: 5px; padding-left: 10px; border-left: 2px solid #ddd; }
         
         /* Ajuste para o Raio-X ficar forçadamente em uma linha única */
@@ -119,6 +119,17 @@
         <label><input type="checkbox" class="chk-rx" value="RX-6" checked> RX-6</label>
     </div>
 
+    <label>Produção em manga palete?</label>
+    <select id="f_rx_manga" onchange="toggleVisibilidade('f_rx_manga', 'box_rx_manga', 'Não')">
+        <option value="Sim">Sim</option>
+        <option value="Não">Não</option>
+    </select>
+    <div id="box_rx_manga" class="hidden-field">
+        <label style="margin-top:0;">Horas de produção em:</label>
+        <input type="number" id="f_rx_hrs_saca" placeholder="Saca (Ex: 2 horas)">
+        <input type="number" id="f_rx_hrs_caixa" placeholder="Caixa de Papelão (Ex: 1.5 horas)">
+    </div>
+
     <h3>👥 Gestão de Pessoas</h3>
     <label>Absenteísmo:</label> <input type="number" id="f_absenteismo" placeholder="Qtd faltas totais">
     <label>Total Efetivo Operacional:</label> <input type="number" id="f_efetivo_op" placeholder="Presentes na Operação">
@@ -135,6 +146,35 @@
         <label style="margin-top: 0;">Faltas para fechar o quadro:</label>
         <input type="number" id="f_falta_op" placeholder="Falta Operacional (Qtd)">
         <input type="number" id="f_falta_apac" placeholder="Falta APAC (Qtd)">
+    </div>
+
+    <h3>🧹 5S</h3>
+    <label>Papelão, cantoneira e sacas retirados?</label>
+    <select id="f_5s" onchange="toggleVisibilidade('f_5s', 'box_5s', 'Não')">
+        <option value="Sim">Sim</option>
+        <option value="Não">Não</option>
+    </select>
+    <div id="box_5s" class="hidden-field">
+        <textarea id="f_5s_detalhe" rows="3" placeholder="Descreva o que faltou ser retirado/organizado..."></textarea>
+    </div>
+
+    <h3>⛑️ EHS (Segurança)</h3>
+    <label>Houve Acidentes?</label>
+    <select id="f_ehs_acidente" onchange="toggleVisibilidade('f_ehs_acidente', 'box_ehs_acidente', 'Sim')">
+        <option value="Não">Não</option>
+        <option value="Sim">Sim</option>
+    </select>
+    <div id="box_ehs_acidente" class="hidden-field">
+        <textarea id="f_ehs_acidente_detalhe" rows="3" placeholder="Descreva os detalhes do acidente..."></textarea>
+    </div>
+
+    <label>Houve Incidentes?</label>
+    <select id="f_ehs_incidente" onchange="toggleVisibilidade('f_ehs_incidente', 'box_ehs_incidente', 'Sim')">
+        <option value="Não">Não</option>
+        <option value="Sim">Sim</option>
+    </select>
+    <div id="box_ehs_incidente" class="hidden-field">
+        <textarea id="f_ehs_incidente_detalhe" rows="3" placeholder="Descreva os detalhes do incidente..."></textarea>
     </div>
 
     <h3>🚚 Last-Mile</h3>
@@ -194,6 +234,11 @@
                 <span style="white-space: nowrap;">Status Raio-X:</span>
                 <div id="r_rx_status" class="rx-grid-report"></div>
             </div>
+            
+            <div class="item-img" style="margin-top: 5px;">Produção Manga Palete: <span class="item-val" id="r_rx_manga_status">-</span></div>
+            <div class="item-img" id="r_rx_manga_box" style="display: none; padding: 5px; background: #fffdf5; border-left: 2px solid #d39e00; margin-top: 5px; flex-direction: column;">
+                <em>Produção Alternativas:</em> <span class="item-val" id="r_rx_manga_detalhe" style="text-align: left; font-weight: normal; font-size: 12px; margin-top: 3px; white-space: pre-wrap;">-</span>
+            </div>
         </div>
 
         <div class="section-img">
@@ -202,6 +247,27 @@
             <div class="item-img">Efetivo Operacional / Líder: <span class="item-val" id="r_op_geral">-</span></div>
             <div class="item-img">Efetivo APAC / Líder: <span class="item-val" id="r_apac_geral">-</span></div>
             <div class="item-img">Quadro Completo? <span class="item-val" id="r_quadro_comp">-</span></div>
+        </div>
+
+        <div class="section-img">
+            <div class="section-title">🧹 5S</div>
+            <div class="item-img">Materiais retirados/organizados? <span class="item-val" id="r_5s_status">-</span></div>
+            <div class="item-img" id="r_5s_box" style="display: none; padding: 5px; background: #fffdf5; border-left: 2px solid #d39e00; margin-top: 5px; flex-direction: column;">
+                <em>Observações de 5S:</em> <span class="item-val" id="r_5s_detalhe" style="text-align: left; font-weight: normal; font-size: 12px; margin-top: 3px; white-space: pre-wrap;">-</span>
+            </div>
+        </div>
+
+        <div class="section-img">
+            <div class="section-title">⛑️ EHS (Segurança)</div>
+            <div class="item-img">Acidentes reportados: <span class="item-val" id="r_ehs_acidente_status">-</span></div>
+            <div class="item-img" id="r_ehs_acidente_box" style="display: none; padding: 5px; background: #fdf5f5; border-left: 2px solid #d9534f; margin-top: 5px; flex-direction: column;">
+                <em>Detalhes do Acidente:</em> <span class="item-val" id="r_ehs_acidente_detalhe" style="text-align: left; font-weight: normal; font-size: 12px; margin-top: 3px; white-space: pre-wrap;">-</span>
+            </div>
+
+            <div class="item-img" style="margin-top: 5px;">Incidentes reportados: <span class="item-val" id="r_ehs_incidente_status">-</span></div>
+            <div class="item-img" id="r_ehs_incidente_box" style="display: none; padding: 5px; background: #fffdf5; border-left: 2px solid #d39e00; margin-top: 5px; flex-direction: column;">
+                <em>Detalhes do Incidente:</em> <span class="item-val" id="r_ehs_incidente_detalhe" style="text-align: left; font-weight: normal; font-size: 12px; margin-top: 3px; white-space: pre-wrap;">-</span>
+            </div>
         </div>
 
         <div class="section-img">
@@ -292,7 +358,7 @@
         preencherTexto('f_equip_recebidos', 'r_equip_recebidos');
         preencherTexto('f_pct_desatrelados', 'r_pct_desatrelados');
 
-        // AWBs Seleção (Agora abre uma caixa de destaque)
+        // AWBs Seleção
         if(document.getElementById('f_awb_sel').value === 'Sim') {
             let qtd = document.getElementById('f_awb_sel_qtd').value || '0';
             let num = document.getElementById('f_awb_sel_num').value || 'Não informado';
@@ -304,7 +370,7 @@
             document.getElementById('r_awb_sel_box').style.display = 'none';
         }
 
-        // AWBs Problema (Agora abre uma caixa de destaque)
+        // AWBs Problema
         if(document.getElementById('f_awb_prob').value === 'Sim') {
             let qtd = document.getElementById('f_awb_prob_qtd').value || '0';
             let num = document.getElementById('f_awb_prob_num').value || 'Não informado';
@@ -338,11 +404,23 @@
         document.querySelectorAll('.chk-rx').forEach((chk, index) => {
             let machineName = `0${index + 1}`;
             if(chk.checked) {
-                rxContainerReport.innerHTML += `<div class="rx-item">RX-${machineName}: <span style="color: #28a745; font-size: 14px;">✔</span></div>`;
+                rxContainerReport.innerHTML += `<div class="rx-item">RX-${machineName}: <span class="status-success" style="font-size: 14px;">✔</span></div>`;
             } else {
-                rxContainerReport.innerHTML += `<div class="rx-item">RX-${machineName}: <span style="color: #d9534f; font-size: 14px;">❌</span></div>`;
+                rxContainerReport.innerHTML += `<div class="rx-item">RX-${machineName}: <span class="status-alert" style="font-size: 14px;">❌</span></div>`;
             }
         });
+
+        // Produção em Manga Palete
+        if(document.getElementById('f_rx_manga').value === 'Não') {
+            let saca = document.getElementById('f_rx_hrs_saca').value || '0';
+            let caixa = document.getElementById('f_rx_hrs_caixa').value || '0';
+            document.getElementById('r_rx_manga_status').innerHTML = `<span class="status-warn">Não</span>`;
+            document.getElementById('r_rx_manga_box').style.display = 'flex';
+            document.getElementById('r_rx_manga_detalhe').innerText = `Produção em Saca: ${saca} horas \nProdução em Caixa de Papelão: ${caixa} horas`;
+        } else {
+            document.getElementById('r_rx_manga_status').innerHTML = `<span class="status-success">Sim</span>`;
+            document.getElementById('r_rx_manga_box').style.display = 'none';
+        }
 
         // 4. Gestão de Pessoas
         preencherTexto('f_absenteismo', 'r_absenteismo');
@@ -355,12 +433,41 @@
         document.getElementById('r_apac_geral').innerText = `${efApac} Apac + ${lidApac} Líder`;
 
         if(document.getElementById('f_quadro_comp').value === 'Sim') {
-            document.getElementById('r_quadro_comp').innerText = 'Sim';
+            document.getElementById('r_quadro_comp').innerHTML = `<span class="status-success">Sim</span>`;
             document.getElementById('r_quadro_comp').classList.remove('status-alert');
         } else {
             let fOp = document.getElementById('f_falta_op').value || '0';
             let fApac = document.getElementById('f_falta_apac').value || '0';
             document.getElementById('r_quadro_comp').innerHTML = `<span class="status-alert">Não (Falta: ${fOp} Op, ${fApac} Apac)</span>`;
+        }
+
+        // 5S
+        if(document.getElementById('f_5s').value === 'Não') {
+            document.getElementById('r_5s_status').innerHTML = `<span class="status-warn">Não</span>`;
+            document.getElementById('r_5s_box').style.display = 'flex';
+            document.getElementById('r_5s_detalhe').innerText = document.getElementById('f_5s_detalhe').value || 'Nenhuma observação informada.';
+        } else {
+            document.getElementById('r_5s_status').innerHTML = `<span class="status-success">Sim</span>`;
+            document.getElementById('r_5s_box').style.display = 'none';
+        }
+
+        // EHS
+        if(document.getElementById('f_ehs_acidente').value === 'Sim') {
+            document.getElementById('r_ehs_acidente_status').innerHTML = `<span class="status-alert">Sim</span>`;
+            document.getElementById('r_ehs_acidente_box').style.display = 'flex';
+            document.getElementById('r_ehs_acidente_detalhe').innerText = document.getElementById('f_ehs_acidente_detalhe').value || 'Nenhum detalhe informado.';
+        } else {
+            document.getElementById('r_ehs_acidente_status').innerHTML = `<span class="status-success">Não</span>`;
+            document.getElementById('r_ehs_acidente_box').style.display = 'none';
+        }
+
+        if(document.getElementById('f_ehs_incidente').value === 'Sim') {
+            document.getElementById('r_ehs_incidente_status').innerHTML = `<span class="status-warn">Sim</span>`;
+            document.getElementById('r_ehs_incidente_box').style.display = 'flex';
+            document.getElementById('r_ehs_incidente_detalhe').innerText = document.getElementById('f_ehs_incidente_detalhe').value || 'Nenhum detalhe informado.';
+        } else {
+            document.getElementById('r_ehs_incidente_status').innerHTML = `<span class="status-success">Não</span>`;
+            document.getElementById('r_ehs_incidente_box').style.display = 'none';
         }
 
         // 5. Last-Mile
@@ -382,7 +489,7 @@
         parseCarretas('.calc-imile', 'r_lista_imile');
         document.getElementById('r_total_lm').innerText = calcularTotalLastMile().toLocaleString('pt-BR') + ' remessas';
 
-        // 6. Geração da Imagem com fix de scroll no html2canvas para mobile
+        // 6. Geração da Imagem
         setTimeout(() => {
             html2canvas(document.querySelector("#canvasArea"), { 
                 scale: 2, 
