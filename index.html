@@ -109,6 +109,8 @@
 
     <h3>☢️ Raio-X</h3>
     <label>Qtd de pacotes processados no Raio-X:</label> <input type="number" id="f_rx_processados" placeholder="Ex: 40000">
+    <label>Qtd de remessas não bipadas:</label> <input type="number" id="f_nao_bipadas" placeholder="Ex: 10">
+    
     <label>Status de Funcionamento dos Raios-X:</label>
     <div class="checkbox-group">
         <label><input type="checkbox" class="chk-rx" value="RX-1" checked> RX-1</label>
@@ -149,6 +151,9 @@
     </div>
 
     <h3>🧹 5S</h3>
+    <label>Qtd de lâminas para retirada:</label> 
+    <input type="number" id="f_laminas" placeholder="Ex: 10">
+
     <label>Papelão, cantoneira e sacas retirados?</label>
     <select id="f_5s" onchange="toggleVisibilidade('f_5s', 'box_5s', 'Não')">
         <option value="Sim">Sim</option>
@@ -230,7 +235,10 @@
         <div class="section-img">
             <div class="section-title">☢️ Raio-X</div>
             <div class="item-img">Pacotes Processados: <span class="item-val status-success" id="r_rx_processados">-</span></div>
-            <div class="item-img rx-line-container">
+            <div class="item-img">Remessas Não Bipadas: <span class="item-val" id="r_nao_bipadas">-</span></div>
+            <div class="item-img">Taxa de Bipagem (Meta 99.95%): <span class="item-val" id="r_taxa_bipagem">-</span></div>
+
+            <div class="item-img rx-line-container" style="margin-top: 8px;">
                 <span style="white-space: nowrap;">Status Raio-X:</span>
                 <div id="r_rx_status" class="rx-grid-report"></div>
             </div>
@@ -251,6 +259,7 @@
 
         <div class="section-img">
             <div class="section-title">🧹 5S</div>
+            <div class="item-img">Lâminas para retirada: <span class="item-val" id="r_laminas">-</span></div>
             <div class="item-img">Materiais retirados/organizados? <span class="item-val" id="r_5s_status">-</span></div>
             <div class="item-img" id="r_5s_box" style="display: none; padding: 5px; background: #fffdf5; border-left: 2px solid #d39e00; margin-top: 5px; flex-direction: column;">
                 <em>Observações de 5S:</em> <span class="item-val" id="r_5s_detalhe" style="text-align: left; font-weight: normal; font-size: 12px; margin-top: 3px; white-space: pre-wrap;">-</span>
@@ -395,8 +404,26 @@
             boxHandlingDetalhe.style.display = 'none';
         }
 
-        // 3. Raio-X
+        // 3. Raio-X e Cálculo de Bipagem
         preencherTexto('f_rx_processados', 'r_rx_processados');
+        preencherTexto('f_nao_bipadas', 'r_nao_bipadas');
+
+        let rxTotal = parseInt(document.getElementById('f_rx_processados').value) || 0;
+        let naoBipadas = parseInt(document.getElementById('f_nao_bipadas').value) || 0;
+        let elTaxa = document.getElementById('r_taxa_bipagem');
+
+        if(rxTotal > 0) {
+            let taxa = ((rxTotal - naoBipadas) / rxTotal) * 100;
+            elTaxa.innerText = taxa.toFixed(2) + '%';
+            if(taxa < 99.95) {
+                elTaxa.className = 'item-val status-alert';
+            } else {
+                elTaxa.className = 'item-val status-success';
+            }
+        } else {
+            elTaxa.innerText = '-';
+            elTaxa.className = 'item-val';
+        }
         
         let rxContainerReport = document.getElementById('r_rx_status');
         rxContainerReport.innerHTML = ''; 
@@ -441,7 +468,9 @@
             document.getElementById('r_quadro_comp').innerHTML = `<span class="status-alert">Não (Falta: ${fOp} Op, ${fApac} Apac)</span>`;
         }
 
-        // 5S
+        // 5. 5S
+        preencherTexto('f_laminas', 'r_laminas');
+
         if(document.getElementById('f_5s').value === 'Não') {
             document.getElementById('r_5s_status').innerHTML = `<span class="status-warn">Não</span>`;
             document.getElementById('r_5s_box').style.display = 'flex';
@@ -451,7 +480,7 @@
             document.getElementById('r_5s_box').style.display = 'none';
         }
 
-        // EHS
+        // 6. EHS
         if(document.getElementById('f_ehs_acidente').value === 'Sim') {
             document.getElementById('r_ehs_acidente_status').innerHTML = `<span class="status-alert">Sim</span>`;
             document.getElementById('r_ehs_acidente_box').style.display = 'flex';
@@ -470,7 +499,7 @@
             document.getElementById('r_ehs_incidente_box').style.display = 'none';
         }
 
-        // 5. Last-Mile
+        // 7. Last-Mile
         let parseCarretas = (classe, containerId) => {
             let html = '';
             let subtotal = 0;
@@ -489,7 +518,7 @@
         parseCarretas('.calc-imile', 'r_lista_imile');
         document.getElementById('r_total_lm').innerText = calcularTotalLastMile().toLocaleString('pt-BR') + ' remessas';
 
-        // 6. Geração da Imagem
+        // 8. Geração da Imagem
         setTimeout(() => {
             html2canvas(document.querySelector("#canvasArea"), { 
                 scale: 2, 
