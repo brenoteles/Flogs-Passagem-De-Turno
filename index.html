@@ -28,9 +28,14 @@
         
         .total-display { font-size: 16px; font-weight: bold; color: #28a745; margin-top: 10px; text-align: right; }
 
-        /* Estilos da Imagem Gerada (Renderizada fora da área visível) */
+        /* Correção para Mobile: Usando um wrapper invisível posicionado no topo da página */
+        #canvasWrapper {
+            position: absolute; top: 0; left: -9999px; z-index: -1;
+        }
+
+        /* Estilos da Imagem Gerada */
         #canvasArea { 
-            position: absolute; left: -9999px; width: 520px; padding: 30px; 
+            width: 580px; padding: 30px; 
             background: #ffffff; border-radius: 10px; border-top: 8px solid #007bff;
             box-shadow: 0 0 10px rgba(0,0,0,0.05); font-family: 'Segoe UI', sans-serif;
         }
@@ -41,12 +46,14 @@
         .item-img { font-size: 13px; color: #444; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
         .item-val { font-weight: bold; color: #111; text-align: right; word-break: break-word;}
         .status-alert { color: #d9534f; }
+        .status-warn { color: #d39e00; }
         .status-success { color: #28a745; font-size: 14px; }
         .truck-list-img { display: flex; flex-direction: column; width: 100%; margin-top: 5px; padding-left: 10px; border-left: 2px solid #ddd; }
         
-        /* Ajuste para o Raio-X ficar em uma linha única */
-        .rx-grid-report { display: flex; flex-direction: row; flex-wrap: nowrap; gap: 8px; justify-content: flex-end; align-items: center; width: 100%; }
-        .rx-item { display: inline-flex; align-items: center; gap: 2px; font-weight: bold; font-size: 12px; white-space: nowrap; }
+        /* Ajuste para o Raio-X ficar forçadamente em uma linha única */
+        .rx-line-container { display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: space-between; width: 100%; }
+        .rx-grid-report { display: flex; flex-direction: row; flex-wrap: nowrap; gap: 8px; align-items: center; }
+        .rx-item { display: inline-flex; align-items: center; gap: 2px; font-weight: bold; font-size: 11px; white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -78,7 +85,7 @@
     </select>
     <div id="box_awb_sel" class="hidden-field">
         <input type="number" id="f_awb_sel_qtd" placeholder="Quantidade de AWBs">
-        <input type="text" id="f_awb_sel_num" placeholder="Números (Ex: 176-64939092)">
+        <textarea id="f_awb_sel_num" rows="3" placeholder="Insira os números (uma AWB por linha)"></textarea>
     </div>
 
     <label>AWBs com problemas para recebimento?</label>
@@ -88,7 +95,7 @@
     </select>
     <div id="box_awb_prob" class="hidden-field">
         <input type="number" id="f_awb_prob_qtd" placeholder="Quantidade">
-        <input type="text" id="f_awb_prob_num" placeholder="Números / Descrição">
+        <textarea id="f_awb_prob_num" rows="3" placeholder="Insira os números ou descrições (uma por linha)"></textarea>
     </div>
 
     <label>Status da Companhia de Handling:</label>
@@ -147,58 +154,69 @@
     </div>
 </div>
 
-<div id="canvasArea">
-    <div class="header-img" id="r_titulo_turno">Relatório Operacional</div>
-    <div class="date-img" id="data-img"></div>
+<div id="canvasWrapper">
+    <div id="canvasArea">
+        <div class="header-img" id="r_titulo_turno">Relatório Operacional</div>
+        <div class="date-img" id="data-img"></div>
 
-    <div class="section-img">
-        <div class="section-title">⏱️ Operações</div>
-        <div class="item-img">Horário de Operação: <span class="item-val" id="r_horario">-</span></div>
-    </div>
-
-    <div class="section-img">
-        <div class="section-title">📥 Recebimento & Produção</div>
-        <div class="item-img">Equipamentos na Pista: <span class="item-val" id="r_equip_pista">-</span></div>
-        <div class="item-img">Equipamentos na Importação: <span class="item-val" id="r_equip_importacao">-</span></div>
-        <div class="item-img">Total Equipamentos Recebidos: <span class="item-val" id="r_equip_recebidos">-</span></div>
-        <div class="item-img">Pacotes Desatrelados: <span class="item-val status-success" id="r_pct_desatrelados">-</span></div>
-        <div class="item-img">AWBs em Seleção: <span class="item-val" id="r_awb_sel">-</span></div>
-        <div class="item-img">AWBs com Problemas: <span class="item-val" id="r_awb_prob">-</span></div>
-        <div class="item-img">Atendimento Handling: <span class="item-val" id="r_handling_status">-</span></div>
-        <div class="item-img" id="r_handling_detalhe_box" style="display: none; padding: 5px; background: #fdf5f5; border-left: 2px solid #d9534f; margin-top: 5px; flex-direction: column;">
-            <em>Detalhe Handling:</em> <span class="item-val" id="r_handling_detalhe" style="text-align: left; font-weight: normal; font-size: 12px; margin-top: 3px;">-</span>
+        <div class="section-img">
+            <div class="section-title">⏱️ Operações</div>
+            <div class="item-img">Horário de Operação: <span class="item-val" id="r_horario">-</span></div>
         </div>
-    </div>
 
-    <div class="section-img">
-        <div class="section-title">☢️ Raio-X</div>
-        <div class="item-img">Pacotes Processados: <span class="item-val status-success" id="r_rx_processados">-</span></div>
-        <div class="item-img" style="align-items: center; justify-content: flex-start; gap: 15px;">
-            <span>Status RX:</span>
-            <div id="r_rx_status" class="rx-grid-report"></div>
-        </div>
-    </div>
+        <div class="section-img">
+            <div class="section-title">📥 Recebimento & Produção</div>
+            <div class="item-img">Equipamentos na Pista: <span class="item-val" id="r_equip_pista">-</span></div>
+            <div class="item-img">Equipamentos na Importação: <span class="item-val" id="r_equip_importacao">-</span></div>
+            <div class="item-img">Total Equipamentos Recebidos: <span class="item-val" id="r_equip_recebidos">-</span></div>
+            <div class="item-img">Pacotes Desatrelados: <span class="item-val status-success" id="r_pct_desatrelados">-</span></div>
+            
+            <div class="item-img">AWBs em Seleção: <span class="item-val" id="r_awb_sel_status">-</span></div>
+            <div class="item-img" id="r_awb_sel_box" style="display: none; padding: 5px; background: #fffdf5; border-left: 2px solid #d39e00; margin-top: 5px; flex-direction: column;">
+                <em>Detalhes (Seleção):</em> <span class="item-val" id="r_awb_sel_detalhe" style="text-align: left; font-weight: normal; font-size: 12px; margin-top: 3px; white-space: pre-wrap;">-</span>
+            </div>
 
-    <div class="section-img">
-        <div class="section-title">👥 Gestão de Pessoas</div>
-        <div class="item-img">Absenteísmo (Faltas): <span class="item-val" id="r_absenteismo">-</span></div>
-        <div class="item-img">Efetivo Operacional / Líder: <span class="item-val" id="r_op_geral">-</span></div>
-        <div class="item-img">Efetivo APAC / Líder: <span class="item-val" id="r_apac_geral">-</span></div>
-        <div class="item-img">Quadro Completo? <span class="item-val" id="r_quadro_comp">-</span></div>
-    </div>
+            <div class="item-img" style="margin-top: 5px;">AWBs com Problemas: <span class="item-val" id="r_awb_prob_status">-</span></div>
+            <div class="item-img" id="r_awb_prob_box" style="display: none; padding: 5px; background: #fdf5f5; border-left: 2px solid #d9534f; margin-top: 5px; flex-direction: column;">
+                <em>Detalhes (Problemas):</em> <span class="item-val" id="r_awb_prob_detalhe" style="text-align: left; font-weight: normal; font-size: 12px; margin-top: 3px; white-space: pre-wrap;">-</span>
+            </div>
 
-    <div class="section-img">
-        <div class="section-title">🚚 Last-Mile</div>
-        <div class="item-img" style="flex-direction: column;">
-            <strong>J&T:</strong>
-            <div id="r_lista_jt" class="truck-list-img">Nenhuma carreta registrada.</div>
+            <div class="item-img" style="margin-top: 5px;">Atendimento Handling: <span class="item-val" id="r_handling_status">-</span></div>
+            <div class="item-img" id="r_handling_detalhe_box" style="display: none; padding: 5px; background: #fdf5f5; border-left: 2px solid #d9534f; margin-top: 5px; flex-direction: column;">
+                <em>Detalhe Handling:</em> <span class="item-val" id="r_handling_detalhe" style="text-align: left; font-weight: normal; font-size: 12px; margin-top: 3px; white-space: pre-wrap;">-</span>
+            </div>
         </div>
-        <div class="item-img" style="flex-direction: column;">
-            <strong>iMile:</strong>
-            <div id="r_lista_imile" class="truck-list-img">Nenhuma carreta registrada.</div>
+
+        <div class="section-img">
+            <div class="section-title">☢️ Raio-X</div>
+            <div class="item-img">Pacotes Processados: <span class="item-val status-success" id="r_rx_processados">-</span></div>
+            <div class="item-img rx-line-container">
+                <span style="white-space: nowrap;">Status Raio-X:</span>
+                <div id="r_rx_status" class="rx-grid-report"></div>
+            </div>
         </div>
-        <div class="item-img" style="margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 8px;">
-            <strong style="font-size: 15px;">TOTAL EXPEDIDO:</strong> <span class="item-val status-success" id="r_total_lm" style="font-size: 15px;">0 remessas</span>
+
+        <div class="section-img">
+            <div class="section-title">👥 Gestão de Pessoas</div>
+            <div class="item-img">Absenteísmo (Faltas): <span class="item-val" id="r_absenteismo">-</span></div>
+            <div class="item-img">Efetivo Operacional / Líder: <span class="item-val" id="r_op_geral">-</span></div>
+            <div class="item-img">Efetivo APAC / Líder: <span class="item-val" id="r_apac_geral">-</span></div>
+            <div class="item-img">Quadro Completo? <span class="item-val" id="r_quadro_comp">-</span></div>
+        </div>
+
+        <div class="section-img">
+            <div class="section-title">🚚 Last-Mile</div>
+            <div class="item-img" style="flex-direction: column;">
+                <strong>J&T:</strong>
+                <div id="r_lista_jt" class="truck-list-img">Nenhuma carreta registrada.</div>
+            </div>
+            <div class="item-img" style="flex-direction: column;">
+                <strong>iMile:</strong>
+                <div id="r_lista_imile" class="truck-list-img">Nenhuma carreta registrada.</div>
+            </div>
+            <div class="item-img" style="margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 8px;">
+                <strong style="font-size: 15px;">TOTAL EXPEDIDO:</strong> <span class="item-val status-success" id="r_total_lm" style="font-size: 15px;">0 remessas</span>
+            </div>
         </div>
     </div>
 </div>
@@ -250,7 +268,6 @@
     function preencherTexto(idOrigem, idDestino, fallback = '0') {
         let val = document.getElementById(idOrigem).value;
         let finalVal = val ? parseInt(val) : 0;
-        // Se for um número válido, formata com ponto de milhar
         document.getElementById(idDestino).innerText = isNaN(finalVal) || !val ? fallback : finalVal.toLocaleString('pt-BR');
     }
 
@@ -264,7 +281,7 @@
         const strData = dataAtual.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' });
         document.getElementById('data-img').innerText = `Gerado em: ${strData} às ${dataAtual.toLocaleTimeString('pt-BR')}`;
 
-        // 1. Operações (Tratando data e hora com a nova função formatarDataHora)
+        // 1. Operações
         let inicio = formatarDataHora(document.getElementById('f_hr_inicio').value);
         let fim = formatarDataHora(document.getElementById('f_hr_fim').value);
         document.getElementById('r_horario').innerText = `${inicio} até ${fim}`;
@@ -275,22 +292,28 @@
         preencherTexto('f_equip_recebidos', 'r_equip_recebidos');
         preencherTexto('f_pct_desatrelados', 'r_pct_desatrelados');
 
-        // AWBs Seleção
+        // AWBs Seleção (Agora abre uma caixa de destaque)
         if(document.getElementById('f_awb_sel').value === 'Sim') {
             let qtd = document.getElementById('f_awb_sel_qtd').value || '0';
             let num = document.getElementById('f_awb_sel_num').value || 'Não informado';
-            document.getElementById('r_awb_sel').innerHTML = `<span class="status-alert">Sim (${qtd} AWB) - #${num}</span>`;
+            document.getElementById('r_awb_sel_status').innerHTML = `<span class="status-warn">Sim (${qtd} AWB)</span>`;
+            document.getElementById('r_awb_sel_box').style.display = 'flex';
+            document.getElementById('r_awb_sel_detalhe').innerText = num;
         } else {
-            document.getElementById('r_awb_sel').innerText = "Não";
+            document.getElementById('r_awb_sel_status').innerText = "Não";
+            document.getElementById('r_awb_sel_box').style.display = 'none';
         }
 
-        // AWBs Problema
+        // AWBs Problema (Agora abre uma caixa de destaque)
         if(document.getElementById('f_awb_prob').value === 'Sim') {
             let qtd = document.getElementById('f_awb_prob_qtd').value || '0';
             let num = document.getElementById('f_awb_prob_num').value || 'Não informado';
-            document.getElementById('r_awb_prob').innerHTML = `<span class="status-alert">Sim (${qtd} AWB) - #${num}</span>`;
+            document.getElementById('r_awb_prob_status').innerHTML = `<span class="status-alert">Sim (${qtd} AWB)</span>`;
+            document.getElementById('r_awb_prob_box').style.display = 'flex';
+            document.getElementById('r_awb_prob_detalhe').innerText = num;
         } else {
-            document.getElementById('r_awb_prob').innerText = "Não";
+            document.getElementById('r_awb_prob_status').innerText = "Não";
+            document.getElementById('r_awb_prob_box').style.display = 'none';
         }
 
         // Handling
@@ -306,11 +329,11 @@
             boxHandlingDetalhe.style.display = 'none';
         }
 
-        // 3. Raio-X (Processados e Símbolos de Check/X na horizontal, forçado em 1 linha)
+        // 3. Raio-X
         preencherTexto('f_rx_processados', 'r_rx_processados');
         
         let rxContainerReport = document.getElementById('r_rx_status');
-        rxContainerReport.innerHTML = ''; // Limpa antes de preencher
+        rxContainerReport.innerHTML = ''; 
 
         document.querySelectorAll('.chk-rx').forEach((chk, index) => {
             let machineName = `0${index + 1}`;
@@ -321,7 +344,7 @@
             }
         });
 
-        // 4. Gestão de Pessoas (Formato "+" no lugar de "/")
+        // 4. Gestão de Pessoas
         preencherTexto('f_absenteismo', 'r_absenteismo');
         let efOp = document.getElementById('f_efetivo_op').value || '0';
         let lidOp = document.getElementById('f_lider_op').value || '0';
@@ -359,9 +382,15 @@
         parseCarretas('.calc-imile', 'r_lista_imile');
         document.getElementById('r_total_lm').innerText = calcularTotalLastMile().toLocaleString('pt-BR') + ' remessas';
 
-        // 6. Geração da Imagem com segurança de renderização
+        // 6. Geração da Imagem com fix de scroll no html2canvas para mobile
         setTimeout(() => {
-            html2canvas(document.querySelector("#canvasArea"), { scale: 2 }).then(canvas => {
+            html2canvas(document.querySelector("#canvasArea"), { 
+                scale: 2, 
+                scrollX: 0, 
+                scrollY: 0,
+                windowWidth: document.documentElement.offsetWidth,
+                windowHeight: document.documentElement.offsetHeight
+            }).then(canvas => {
                 canvas.toBlob(blob => {
                     const nomeArquivo = 'relatorio_operacional_turno.png';
                     
