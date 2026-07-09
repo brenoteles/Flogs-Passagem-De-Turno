@@ -45,8 +45,8 @@
         .section-title { font-size: 15px; font-weight: bold; color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 4px; margin-bottom: 8px; text-transform: uppercase; }
         .item-img { font-size: 13px; color: #444; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
         .item-val { font-weight: bold; color: #111; text-align: right; word-break: break-word;}
-        .status-alert { color: #d9534f; }
-        .status-warn { color: #d39e00; }
+        .status-alert { color: #d9534f; font-weight: bold;}
+        .status-warn { color: #d39e00; font-weight: bold;}
         .status-success { color: #28a745; font-weight: bold; }
         .truck-list-img { display: flex; flex-direction: column; width: 100%; margin-top: 5px; padding-left: 10px; border-left: 2px solid #ddd; }
         
@@ -216,12 +216,14 @@
             <div class="item-img">Total Equipamentos Recebidos: <span class="item-val" id="r_equip_recebidos">-</span></div>
             <div class="item-img">Pacotes Desatrelados: <span class="item-val status-success" id="r_pct_desatrelados">-</span></div>
             
-            <div class="item-img">AWBs em Seleção: <span class="item-val" id="r_awb_sel_status">-</span></div>
+            <div class="item-img" id="r_awb_combined" style="display: none;">AWBs Seleção / Problemas: <span class="item-val status-success">Não</span></div>
+            
+            <div class="item-img" id="r_awb_sel_row">AWBs em Seleção: <span class="item-val" id="r_awb_sel_status">-</span></div>
             <div class="item-img" id="r_awb_sel_box" style="display: none; padding: 5px; background: #fffdf5; border-left: 2px solid #d39e00; margin-top: 5px; flex-direction: column;">
                 <em>Detalhes (Seleção):</em> <span class="item-val" id="r_awb_sel_detalhe" style="text-align: left; font-weight: normal; font-size: 12px; margin-top: 3px; white-space: pre-wrap;">-</span>
             </div>
 
-            <div class="item-img" style="margin-top: 5px;">AWBs com Problemas: <span class="item-val" id="r_awb_prob_status">-</span></div>
+            <div class="item-img" id="r_awb_prob_row" style="margin-top: 5px;">AWBs com Problemas: <span class="item-val" id="r_awb_prob_status">-</span></div>
             <div class="item-img" id="r_awb_prob_box" style="display: none; padding: 5px; background: #fdf5f5; border-left: 2px solid #d9534f; margin-top: 5px; flex-direction: column;">
                 <em>Detalhes (Problemas):</em> <span class="item-val" id="r_awb_prob_detalhe" style="text-align: left; font-weight: normal; font-size: 12px; margin-top: 3px; white-space: pre-wrap;">-</span>
             </div>
@@ -234,9 +236,7 @@
 
         <div class="section-img">
             <div class="section-title">☢️ Raio-X</div>
-            <div class="item-img">Pacotes Processados: <span class="item-val status-success" id="r_rx_processados">-</span></div>
-            <div class="item-img">Remessas Não Bipadas: <span class="item-val" id="r_nao_bipadas">-</span></div>
-            <div class="item-img">Taxa de Bipagem (Meta 99.95%): <span class="item-val" id="r_taxa_bipagem">-</span></div>
+            <div class="item-img">Pacotes Processados / Pendências: <span class="item-val" id="r_rx_combinado">-</span></div>
 
             <div class="item-img rx-line-container" style="margin-top: 8px;">
                 <span style="white-space: nowrap;">Status Raio-X:</span>
@@ -268,12 +268,14 @@
 
         <div class="section-img">
             <div class="section-title">⛑️ EHS</div>
-            <div class="item-img">Acidentes reportados: <span class="item-val" id="r_ehs_acidente_status">-</span></div>
+            <div class="item-img" id="r_ehs_combined" style="display: none;">Acidentes / Incidentes: <span class="item-val status-success">Não</span></div>
+            
+            <div class="item-img" id="r_ehs_acidente_row">Acidentes reportados: <span class="item-val" id="r_ehs_acidente_status">-</span></div>
             <div class="item-img" id="r_ehs_acidente_box" style="display: none; padding: 5px; background: #fdf5f5; border-left: 2px solid #d9534f; margin-top: 5px; flex-direction: column;">
                 <em>Detalhes do Acidente:</em> <span class="item-val" id="r_ehs_acidente_detalhe" style="text-align: left; font-weight: normal; font-size: 12px; margin-top: 3px; white-space: pre-wrap;">-</span>
             </div>
 
-            <div class="item-img" style="margin-top: 5px;">Incidentes reportados: <span class="item-val" id="r_ehs_incidente_status">-</span></div>
+            <div class="item-img" id="r_ehs_incidente_row" style="margin-top: 5px;">Incidentes reportados: <span class="item-val" id="r_ehs_incidente_status">-</span></div>
             <div class="item-img" id="r_ehs_incidente_box" style="display: none; padding: 5px; background: #fffdf5; border-left: 2px solid #d39e00; margin-top: 5px; flex-direction: column;">
                 <em>Detalhes do Incidente:</em> <span class="item-val" id="r_ehs_incidente_detalhe" style="text-align: left; font-weight: normal; font-size: 12px; margin-top: 3px; white-space: pre-wrap;">-</span>
             </div>
@@ -367,28 +369,42 @@
         preencherTexto('f_equip_recebidos', 'r_equip_recebidos');
         preencherTexto('f_pct_desatrelados', 'r_pct_desatrelados');
 
-        // AWBs Seleção
-        if(document.getElementById('f_awb_sel').value === 'Sim') {
-            let qtd = document.getElementById('f_awb_sel_qtd').value || '0';
-            let num = document.getElementById('f_awb_sel_num').value || 'Não informado';
-            document.getElementById('r_awb_sel_status').innerHTML = `<span class="status-warn">Sim (${qtd} AWB)</span>`;
-            document.getElementById('r_awb_sel_box').style.display = 'flex';
-            document.getElementById('r_awb_sel_detalhe').innerText = num;
-        } else {
-            document.getElementById('r_awb_sel_status').innerText = "Não";
-            document.getElementById('r_awb_sel_box').style.display = 'none';
-        }
+        // AWBs Seleção / Problemas (Lógica Combinada)
+        let awbSel = document.getElementById('f_awb_sel').value;
+        let awbProb = document.getElementById('f_awb_prob').value;
 
-        // AWBs Problema
-        if(document.getElementById('f_awb_prob').value === 'Sim') {
-            let qtd = document.getElementById('f_awb_prob_qtd').value || '0';
-            let num = document.getElementById('f_awb_prob_num').value || 'Não informado';
-            document.getElementById('r_awb_prob_status').innerHTML = `<span class="status-alert">Sim (${qtd} AWB)</span>`;
-            document.getElementById('r_awb_prob_box').style.display = 'flex';
-            document.getElementById('r_awb_prob_detalhe').innerText = num;
-        } else {
-            document.getElementById('r_awb_prob_status').innerText = "Não";
+        if (awbSel === 'Não' && awbProb === 'Não') {
+            document.getElementById('r_awb_combined').style.display = 'flex';
+            document.getElementById('r_awb_sel_row').style.display = 'none';
+            document.getElementById('r_awb_prob_row').style.display = 'none';
+            document.getElementById('r_awb_sel_box').style.display = 'none';
             document.getElementById('r_awb_prob_box').style.display = 'none';
+        } else {
+            document.getElementById('r_awb_combined').style.display = 'none';
+            document.getElementById('r_awb_sel_row').style.display = 'flex';
+            document.getElementById('r_awb_prob_row').style.display = 'flex';
+
+            if(awbSel === 'Sim') {
+                let qtd = document.getElementById('f_awb_sel_qtd').value || '0';
+                let num = document.getElementById('f_awb_sel_num').value || 'Não informado';
+                document.getElementById('r_awb_sel_status').innerHTML = `<span class="status-warn">Sim (${qtd} AWB)</span>`;
+                document.getElementById('r_awb_sel_box').style.display = 'flex';
+                document.getElementById('r_awb_sel_detalhe').innerText = num;
+            } else {
+                document.getElementById('r_awb_sel_status').innerText = "Não";
+                document.getElementById('r_awb_sel_box').style.display = 'none';
+            }
+
+            if(awbProb === 'Sim') {
+                let qtd = document.getElementById('f_awb_prob_qtd').value || '0';
+                let num = document.getElementById('f_awb_prob_num').value || 'Não informado';
+                document.getElementById('r_awb_prob_status').innerHTML = `<span class="status-alert">Sim (${qtd} AWB)</span>`;
+                document.getElementById('r_awb_prob_box').style.display = 'flex';
+                document.getElementById('r_awb_prob_detalhe').innerText = num;
+            } else {
+                document.getElementById('r_awb_prob_status').innerText = "Não";
+                document.getElementById('r_awb_prob_box').style.display = 'none';
+            }
         }
 
         // Handling
@@ -404,25 +420,22 @@
             boxHandlingDetalhe.style.display = 'none';
         }
 
-        // 3. Raio-X e Cálculo de Bipagem
-        preencherTexto('f_rx_processados', 'r_rx_processados');
-        preencherTexto('f_nao_bipadas', 'r_nao_bipadas');
-
-        let rxTotal = parseInt(document.getElementById('f_rx_processados').value) || 0;
-        let naoBipadas = parseInt(document.getElementById('f_nao_bipadas').value) || 0;
-        let elTaxa = document.getElementById('r_taxa_bipagem');
+        // 3. Raio-X e Cálculo de Bipagem Unificado
+        let rxTotalStr = document.getElementById('f_rx_processados').value;
+        let naoBipadasStr = document.getElementById('f_nao_bipadas').value;
+        let rxTotal = parseInt(rxTotalStr) || 0;
+        let naoBipadas = parseInt(naoBipadasStr) || 0;
+        
+        let formatadoTotal = isNaN(rxTotal) || !rxTotalStr ? '0' : rxTotal;
+        let formatadoPend = isNaN(naoBipadas) || !naoBipadasStr ? '0' : naoBipadas;
+        let elCombinadoRx = document.getElementById('r_rx_combinado');
 
         if(rxTotal > 0) {
             let taxa = ((rxTotal - naoBipadas) / rxTotal) * 100;
-            elTaxa.innerText = taxa.toFixed(2) + '%';
-            if(taxa < 99.95) {
-                elTaxa.className = 'item-val status-alert';
-            } else {
-                elTaxa.className = 'item-val status-success';
-            }
+            let classTaxa = taxa < 99.95 ? 'status-alert' : 'status-success';
+            elCombinadoRx.innerHTML = `${formatadoTotal}/${formatadoPend} - Taxa de <span class="${classTaxa}">${taxa.toFixed(4)}%</span>`;
         } else {
-            elTaxa.innerText = '-';
-            elTaxa.className = 'item-val';
+            elCombinadoRx.innerHTML = `${formatadoTotal}/${formatadoPend} - Taxa de -`;
         }
         
         let rxContainerReport = document.getElementById('r_rx_status');
@@ -480,23 +493,38 @@
             document.getElementById('r_5s_box').style.display = 'none';
         }
 
-        // 6. EHS
-        if(document.getElementById('f_ehs_acidente').value === 'Sim') {
-            document.getElementById('r_ehs_acidente_status').innerHTML = `<span class="status-alert">Sim</span>`;
-            document.getElementById('r_ehs_acidente_box').style.display = 'flex';
-            document.getElementById('r_ehs_acidente_detalhe').innerText = document.getElementById('f_ehs_acidente_detalhe').value || 'Nenhum detalhe informado.';
-        } else {
-            document.getElementById('r_ehs_acidente_status').innerHTML = `<span class="status-success">Não</span>`;
-            document.getElementById('r_ehs_acidente_box').style.display = 'none';
-        }
+        // 6. EHS (Lógica Combinada)
+        let ehsAcidente = document.getElementById('f_ehs_acidente').value;
+        let ehsIncidente = document.getElementById('f_ehs_incidente').value;
 
-        if(document.getElementById('f_ehs_incidente').value === 'Sim') {
-            document.getElementById('r_ehs_incidente_status').innerHTML = `<span class="status-warn">Sim</span>`;
-            document.getElementById('r_ehs_incidente_box').style.display = 'flex';
-            document.getElementById('r_ehs_incidente_detalhe').innerText = document.getElementById('f_ehs_incidente_detalhe').value || 'Nenhum detalhe informado.';
-        } else {
-            document.getElementById('r_ehs_incidente_status').innerHTML = `<span class="status-success">Não</span>`;
+        if (ehsAcidente === 'Não' && ehsIncidente === 'Não') {
+            document.getElementById('r_ehs_combined').style.display = 'flex';
+            document.getElementById('r_ehs_acidente_row').style.display = 'none';
+            document.getElementById('r_ehs_incidente_row').style.display = 'none';
+            document.getElementById('r_ehs_acidente_box').style.display = 'none';
             document.getElementById('r_ehs_incidente_box').style.display = 'none';
+        } else {
+            document.getElementById('r_ehs_combined').style.display = 'none';
+            document.getElementById('r_ehs_acidente_row').style.display = 'flex';
+            document.getElementById('r_ehs_incidente_row').style.display = 'flex';
+
+            if(ehsAcidente === 'Sim') {
+                document.getElementById('r_ehs_acidente_status').innerHTML = `<span class="status-alert">Sim</span>`;
+                document.getElementById('r_ehs_acidente_box').style.display = 'flex';
+                document.getElementById('r_ehs_acidente_detalhe').innerText = document.getElementById('f_ehs_acidente_detalhe').value || 'Nenhum detalhe informado.';
+            } else {
+                document.getElementById('r_ehs_acidente_status').innerHTML = `<span class="status-success">Não</span>`;
+                document.getElementById('r_ehs_acidente_box').style.display = 'none';
+            }
+
+            if(ehsIncidente === 'Sim') {
+                document.getElementById('r_ehs_incidente_status').innerHTML = `<span class="status-warn">Sim</span>`;
+                document.getElementById('r_ehs_incidente_box').style.display = 'flex';
+                document.getElementById('r_ehs_incidente_detalhe').innerText = document.getElementById('f_ehs_incidente_detalhe').value || 'Nenhum detalhe informado.';
+            } else {
+                document.getElementById('r_ehs_incidente_status').innerHTML = `<span class="status-success">Não</span>`;
+                document.getElementById('r_ehs_incidente_box').style.display = 'none';
+            }
         }
 
         // 7. Last-Mile
