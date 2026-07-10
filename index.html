@@ -76,7 +76,7 @@
     <label>Qtd de equipamentos na pista:</label> <input type="number" id="f_equip_pista" placeholder="Ex: 5">
     <label>Qtd de equipamentos na importação:</label> <input type="number" id="f_equip_importacao" placeholder="Ex: 10">
     <label>Qtd de equipamentos recebidos (Total):</label> <input type="number" id="f_equip_recebidos" placeholder="Ex: 15">
-    <label>Qtd de pacotes desatrelados:</label> <input type="number" id="f_pct_desatrelados" placeholder="Ex: 40000">
+    <label>Qtd de AWBs despaletizadas:</label> <input type="number" id="f_awb_despaletizadas" placeholder="Ex: 10">
     
     <label>AWBs em seleção?</label>
     <select id="f_awb_sel" onchange="toggleVisibilidade('f_awb_sel', 'box_awb_sel', 'Sim')">
@@ -132,6 +132,18 @@
         <input type="number" id="f_rx_hrs_caixa" placeholder="Caixa de Papelão (Ex: 1.5 horas)">
     </div>
 
+    <h3>🚚 Last-Mile</h3>
+    
+    <label>Qtd de Carretas J&T:</label> 
+    <input type="number" id="f_qtd_jt" placeholder="Ex: 2" min="0" oninput="gerarCamposCarretas('jt', 'J&T')">
+    <div id="container_jt" class="dynamic-list"></div>
+
+    <label>Qtd de Carretas iMile:</label> 
+    <input type="number" id="f_qtd_imile" placeholder="Ex: 3" min="0" oninput="gerarCamposCarretas('imile', 'iMile')">
+    <div id="container_imile" class="dynamic-list"></div>
+
+    <div class="total-display">Total Last-Mile Expedido: <span id="lbl_total_lm">0</span> remessas</div>
+
     <h3>👥 Gestão de Pessoas</h3>
     <label>Absenteísmo:</label> <input type="number" id="f_absenteismo" placeholder="Qtd faltas totais">
     <label>Total Efetivo Operacional:</label> <input type="number" id="f_efetivo_op" placeholder="Presentes na Operação">
@@ -154,7 +166,7 @@
     <label>Qtd de lâminas para retirada:</label> 
     <input type="number" id="f_laminas" placeholder="Ex: 10">
 
-    <label>Papelão, cantoneiras e sacas retiradas?</label>
+    <label>Papelão, sacas e cantoneiras retirados?</label>
     <select id="f_5s" onchange="toggleVisibilidade('f_5s', 'box_5s', 'Não')">
         <option value="Sim">Sim</option>
         <option value="Não">Não</option>
@@ -182,18 +194,6 @@
         <textarea id="f_ehs_incidente_detalhe" rows="3" placeholder="Descreva os detalhes do incidente..."></textarea>
     </div>
 
-    <h3>🚚 Last-Mile</h3>
-    
-    <label>Qtd de Carretas J&T:</label> 
-    <input type="number" id="f_qtd_jt" placeholder="Ex: 2" min="0" oninput="gerarCamposCarretas('jt', 'J&T')">
-    <div id="container_jt" class="dynamic-list"></div>
-
-    <label>Qtd de Carretas iMile:</label> 
-    <input type="number" id="f_qtd_imile" placeholder="Ex: 3" min="0" oninput="gerarCamposCarretas('imile', 'iMile')">
-    <div id="container_imile" class="dynamic-list"></div>
-
-    <div class="total-display">Total Last-Mile Expedido: <span id="lbl_total_lm">0</span> remessas</div>
-
     <div class="btn-container">
         <button onclick="processarRelatorio()">Gerar Relatório de Turno</button>
     </div>
@@ -211,10 +211,13 @@
 
         <div class="section-img">
             <div class="section-title">📥 Recebimento</div>
-            <div class="item-img">Equipamentos na Pista: <span class="item-val" id="r_equip_pista">-</span></div>
-            <div class="item-img">Equipamentos na Importação: <span class="item-val" id="r_equip_importacao">-</span></div>
-            <div class="item-img">Total Equipamentos Recebidos: <span class="item-val" id="r_equip_recebidos">-</span></div>
-            <div class="item-img">Pacotes Desatrelados: <span class="item-val status-success" id="r_pct_desatrelados">-</span></div>
+            
+            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; background: #f9f9f9; padding: 6px 10px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 8px;">
+                <div style="width: 48%; margin-bottom: 4px; font-size: 12px; color: #444;">Equip. Pista: <span style="font-weight: bold; color: #111;" id="r_equip_pista">-</span></div>
+                <div style="width: 48%; margin-bottom: 4px; font-size: 12px; text-align: right; color: #444;">Equip. Importação: <span style="font-weight: bold; color: #111;" id="r_equip_importacao">-</span></div>
+                <div style="width: 48%; font-size: 12px; color: #444;">Total Recebidos: <span style="font-weight: bold; color: #111;" id="r_equip_recebidos">-</span></div>
+                <div style="width: 48%; font-size: 12px; text-align: right; color: #444;">AWBs Despaletizadas: <span style="font-weight: bold;" class="status-success" id="r_awb_despaletizadas">-</span></div>
+            </div>
             
             <div class="item-img" id="r_awb_combined" style="display: none;">AWBs Seleção / Problemas: <span class="item-val status-success">Não</span></div>
             
@@ -236,9 +239,8 @@
 
         <div class="section-img">
             <div class="section-title">☢️ Raio-X</div>
-            <div class="item-img">Pacotes Processados / Pendências: <span class="item-val" id="r_rx_combinado">-</span></div>
 
-            <div class="item-img rx-line-container" style="margin-top: 8px;">
+            <div class="item-img rx-line-container" style="margin-top: 5px;">
                 <span style="white-space: nowrap;">Status Raio-X:</span>
                 <div id="r_rx_status" class="rx-grid-report"></div>
             </div>
@@ -246,6 +248,26 @@
             <div class="item-img" style="margin-top: 5px;">Produção Manga Palete: <span class="item-val" id="r_rx_manga_status">-</span></div>
             <div class="item-img" id="r_rx_manga_box" style="display: none; padding: 5px; background: #fffdf5; border-left: 2px solid #d39e00; margin-top: 5px; flex-direction: column;">
                 <em>Produção Alternativas:</em> <span class="item-val" id="r_rx_manga_detalhe" style="text-align: left; font-weight: normal; font-size: 12px; margin-top: 3px; white-space: pre-wrap;">-</span>
+            </div>
+
+            <div class="item-img" style="margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 8px;">
+                <strong style="font-size: 15px;">PROCESSADOS / PENDÊNCIAS:</strong> 
+                <span class="item-val" id="r_rx_combinado" style="font-size: 15px;">-</span>
+            </div>
+        </div>
+
+        <div class="section-img">
+            <div class="section-title">🚚 Last-Mile</div>
+            <div class="item-img" style="flex-direction: column;">
+                <strong>J&T:</strong>
+                <div id="r_lista_jt" class="truck-list-img">Nenhuma carreta registrada.</div>
+            </div>
+            <div class="item-img" style="flex-direction: column;">
+                <strong>iMile:</strong>
+                <div id="r_lista_imile" class="truck-list-img">Nenhuma carreta registrada.</div>
+            </div>
+            <div class="item-img" style="margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 8px;">
+                <strong style="font-size: 15px;">TOTAL EXPEDIDO:</strong> <span class="item-val status-success" id="r_total_lm" style="font-size: 15px;">0 remessas</span>
             </div>
         </div>
 
@@ -278,21 +300,6 @@
             <div class="item-img" id="r_ehs_incidente_row" style="margin-top: 5px;">Incidentes reportados: <span class="item-val" id="r_ehs_incidente_status">-</span></div>
             <div class="item-img" id="r_ehs_incidente_box" style="display: none; padding: 5px; background: #fffdf5; border-left: 2px solid #d39e00; margin-top: 5px; flex-direction: column;">
                 <em>Detalhes do Incidente:</em> <span class="item-val" id="r_ehs_incidente_detalhe" style="text-align: left; font-weight: normal; font-size: 12px; margin-top: 3px; white-space: pre-wrap;">-</span>
-            </div>
-        </div>
-
-        <div class="section-img">
-            <div class="section-title">🚚 Last-Mile</div>
-            <div class="item-img" style="flex-direction: column;">
-                <strong>J&T:</strong>
-                <div id="r_lista_jt" class="truck-list-img">Nenhuma carreta registrada.</div>
-            </div>
-            <div class="item-img" style="flex-direction: column;">
-                <strong>iMile:</strong>
-                <div id="r_lista_imile" class="truck-list-img">Nenhuma carreta registrada.</div>
-            </div>
-            <div class="item-img" style="margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 8px;">
-                <strong style="font-size: 15px;">TOTAL EXPEDIDO:</strong> <span class="item-val status-success" id="r_total_lm" style="font-size: 15px;">0 remessas</span>
             </div>
         </div>
     </div>
@@ -367,7 +374,7 @@
         preencherTexto('f_equip_pista', 'r_equip_pista');
         preencherTexto('f_equip_importacao', 'r_equip_importacao');
         preencherTexto('f_equip_recebidos', 'r_equip_recebidos');
-        preencherTexto('f_pct_desatrelados', 'r_pct_desatrelados');
+        preencherTexto('f_awb_despaletizadas', 'r_awb_despaletizadas');
 
         // AWBs Seleção / Problemas (Lógica Combinada)
         let awbSel = document.getElementById('f_awb_sel').value;
@@ -420,24 +427,7 @@
             boxHandlingDetalhe.style.display = 'none';
         }
 
-        // 3. Raio-X e Cálculo de Bipagem Unificado
-        let rxTotalStr = document.getElementById('f_rx_processados').value;
-        let naoBipadasStr = document.getElementById('f_nao_bipadas').value;
-        let rxTotal = parseInt(rxTotalStr) || 0;
-        let naoBipadas = parseInt(naoBipadasStr) || 0;
-        
-        let formatadoTotal = isNaN(rxTotal) || !rxTotalStr ? '0' : rxTotal;
-        let formatadoPend = isNaN(naoBipadas) || !naoBipadasStr ? '0' : naoBipadas;
-        let elCombinadoRx = document.getElementById('r_rx_combinado');
-
-        if(rxTotal > 0) {
-            let taxa = ((rxTotal - naoBipadas) / rxTotal) * 100;
-            let classTaxa = taxa < 99.95 ? 'status-alert' : 'status-success';
-            elCombinadoRx.innerHTML = `${formatadoTotal}/${formatadoPend} - Taxa de <span class="${classTaxa}">${taxa.toFixed(4)}%</span>`;
-        } else {
-            elCombinadoRx.innerHTML = `${formatadoTotal}/${formatadoPend} - Taxa de -`;
-        }
-        
+        // 3. Raio-X e Cálculo de Bipagem Unificado (no final do bloco)
         let rxContainerReport = document.getElementById('r_rx_status');
         rxContainerReport.innerHTML = ''; 
 
@@ -460,6 +450,23 @@
         } else {
             document.getElementById('r_rx_manga_status').innerHTML = `<span class="status-success">Sim</span>`;
             document.getElementById('r_rx_manga_box').style.display = 'none';
+        }
+
+        let rxTotalStr = document.getElementById('f_rx_processados').value;
+        let naoBipadasStr = document.getElementById('f_nao_bipadas').value;
+        let rxTotal = parseInt(rxTotalStr) || 0;
+        let naoBipadas = parseInt(naoBipadasStr) || 0;
+        
+        let formatadoTotal = isNaN(rxTotal) || !rxTotalStr ? '0' : rxTotal.toLocaleString('pt-BR');
+        let formatadoPend = isNaN(naoBipadas) || !naoBipadasStr ? '0' : naoBipadas.toLocaleString('pt-BR');
+        let elCombinadoRx = document.getElementById('r_rx_combinado');
+
+        if(rxTotal > 0) {
+            let taxa = ((rxTotal - naoBipadas) / rxTotal) * 100;
+            let classTaxa = taxa < 99.95 ? 'status-alert' : 'status-success';
+            elCombinadoRx.innerHTML = `${formatadoTotal} / ${formatadoPend} - Taxa de <span class="${classTaxa}">${taxa.toFixed(2)}%</span>`;
+        } else {
+            elCombinadoRx.innerHTML = `${formatadoTotal} / ${formatadoPend} - Taxa de -`;
         }
 
         // 4. Gestão de Pessoas
