@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatório Operacional de Turno</title>
+    
+    <!-- Importação das fontes idênticas para todos os sistemas (Força a mesma tipografia e emojis) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         /* Estilos do Formulário (Mobile-First) */
@@ -34,10 +40,12 @@
         }
 
         /* Estilos da Imagem Gerada */
+        /* Força a mesma fonte e emojis na imagem gerada, independentemente do OS */
         #canvasArea { 
             width: 580px; padding: 30px; 
             background: #ffffff; border-radius: 10px; border-top: 8px solid #007bff;
-            box-shadow: 0 0 10px rgba(0,0,0,0.05); font-family: 'Segoe UI', sans-serif;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05); 
+            font-family: 'Inter', 'Noto Color Emoji', sans-serif !important;
         }
         .header-img { text-align: center; color: #333; font-size: 20px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase;}
         .date-img { text-align: center; font-size: 12px; color: #888; margin-bottom: 20px; }
@@ -134,6 +142,15 @@
 
     <h3>🚚 Last-Mile</h3>
     
+    <label>Problemas com o desembaraço?</label>
+    <select id="f_lm_prob" onchange="toggleVisibilidade('f_lm_prob', 'box_lm_prob', 'Sim')">
+        <option value="Não">Não</option>
+        <option value="Sim">Sim</option>
+    </select>
+    <div id="box_lm_prob" class="hidden-field">
+        <textarea id="f_lm_detalhe" rows="3" placeholder="Descreva os problemas (ex: Lentidão acima de 8h no desembaraço, Problemas no sistema da RFB)..."></textarea>
+    </div>
+
     <label>Qtd de Carretas J&T:</label> 
     <input type="number" id="f_qtd_jt" placeholder="Ex: 2" min="0" oninput="gerarCamposCarretas('jt', 'J&T')">
     <div id="container_jt" class="dynamic-list"></div>
@@ -258,6 +275,12 @@
 
         <div class="section-img">
             <div class="section-title">🚚 Last-Mile</div>
+            
+            <div class="item-img" id="r_lm_prob_row">Problemas no desembaraço: <span class="item-val" id="r_lm_prob_status">-</span></div>
+            <div class="item-img" id="r_lm_prob_box" style="display: none; padding: 5px; background: #fdf5f5; border-left: 2px solid #d9534f; margin-top: 5px; margin-bottom: 10px; flex-direction: column;">
+                <em>Detalhes:</em> <span class="item-val" id="r_lm_prob_detalhe" style="text-align: left; font-weight: normal; font-size: 12px; margin-top: 3px; white-space: pre-wrap;">-</span>
+            </div>
+
             <div class="item-img" style="flex-direction: column;">
                 <strong>J&T:</strong>
                 <div id="r_lista_jt" class="truck-list-img">Nenhuma carreta registrada.</div>
@@ -306,7 +329,6 @@
 </div>
 
 <script>
-    // Função para formatar o campo datetime-local em Data e Hora amigável
     function formatarDataHora(inputDatetime) {
         if(!inputDatetime) return '--/--/---- às --:--';
         let partes = inputDatetime.split('T');
@@ -316,7 +338,6 @@
         return `${dataStr} às ${horaStr}`;
     }
 
-    // Controle de exibição de campos dinâmicos
     function toggleVisibilidade(idSelect, idAlvo, valorGatilho) {
         let select = document.getElementById(idSelect).value;
         let alvo = document.getElementById(idAlvo);
@@ -327,9 +348,8 @@
         }
     }
 
-    // Gerador de campos Last Mile dinâmicos
     function gerarCamposCarretas(empresaId, nomeExibicao) {
-        let qtd = parseInt(document.getElementById(`f_qtd_${empresaId}`).value) || 0;
+        let qtd = parseInt(document.getElementById(`f_qtd_${empresaId}`).value, 10) || 0;
         let container = document.getElementById(`container_${empresaId}`);
         container.innerHTML = '';
         
@@ -342,41 +362,35 @@
     function calcularTotalLastMile() {
         let total = 0;
         document.querySelectorAll('.calc-lm').forEach(input => {
-            total += parseInt(input.value) || 0;
+            total += parseInt(input.value, 10) || 0;
         });
         document.getElementById('lbl_total_lm').innerText = total.toLocaleString('pt-BR');
         return total;
     }
 
-    // Função de preenchimento condicional para o Canvas
     function preencherTexto(idOrigem, idDestino, fallback = '0') {
         let val = document.getElementById(idOrigem).value;
-        let finalVal = val ? parseInt(val) : 0;
+        let finalVal = val ? parseInt(val, 10) : 0;
         document.getElementById(idDestino).innerText = isNaN(finalVal) || !val ? fallback : finalVal.toLocaleString('pt-BR');
     }
 
     function processarRelatorio() {
-        // Turno Selecionado no Topo
         let turnoSelecionado = document.getElementById('f_turno').value;
         document.getElementById('r_titulo_turno').innerText = `Relatório Operacional - ${turnoSelecionado}`;
 
-        // Data e Hora de Geração
         const dataAtual = new Date();
         const strData = dataAtual.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' });
         document.getElementById('data-img').innerText = `Gerado em: ${strData} às ${dataAtual.toLocaleTimeString('pt-BR')}`;
 
-        // 1. Operações
         let inicio = formatarDataHora(document.getElementById('f_hr_inicio').value);
         let fim = formatarDataHora(document.getElementById('f_hr_fim').value);
         document.getElementById('r_horario').innerText = `${inicio} até ${fim}`;
 
-        // 2. Recebimento e Produção
         preencherTexto('f_equip_pista', 'r_equip_pista');
         preencherTexto('f_equip_importacao', 'r_equip_importacao');
         preencherTexto('f_equip_recebidos', 'r_equip_recebidos');
         preencherTexto('f_awb_despaletizadas', 'r_awb_despaletizadas');
 
-        // AWBs Seleção / Problemas (Lógica Combinada)
         let awbSel = document.getElementById('f_awb_sel').value;
         let awbProb = document.getElementById('f_awb_prob').value;
 
@@ -414,7 +428,6 @@
             }
         }
 
-        // Handling
         let handling = document.getElementById('f_handling_status').value;
         document.getElementById('r_handling_status').innerText = handling;
         let boxHandlingDetalhe = document.getElementById('r_handling_detalhe_box');
@@ -427,7 +440,6 @@
             boxHandlingDetalhe.style.display = 'none';
         }
 
-        // 3. Raio-X e Cálculo de Bipagem Unificado (no final do bloco)
         let rxContainerReport = document.getElementById('r_rx_status');
         rxContainerReport.innerHTML = ''; 
 
@@ -440,7 +452,6 @@
             }
         });
 
-        // Produção em Manga Palete
         if(document.getElementById('f_rx_manga').value === 'Não') {
             let saca = document.getElementById('f_rx_hrs_saca').value || '0';
             let caixa = document.getElementById('f_rx_hrs_caixa').value || '0';
@@ -454,8 +465,8 @@
 
         let rxTotalStr = document.getElementById('f_rx_processados').value;
         let naoBipadasStr = document.getElementById('f_nao_bipadas').value;
-        let rxTotal = parseInt(rxTotalStr) || 0;
-        let naoBipadas = parseInt(naoBipadasStr) || 0;
+        let rxTotal = parseInt(rxTotalStr, 10) || 0;
+        let naoBipadas = parseInt(naoBipadasStr, 10) || 0;
         
         let formatadoTotal = isNaN(rxTotal) || !rxTotalStr ? '0' : rxTotal.toLocaleString('pt-BR');
         let formatadoPend = isNaN(naoBipadas) || !naoBipadasStr ? '0' : naoBipadas.toLocaleString('pt-BR');
@@ -469,7 +480,6 @@
             elCombinadoRx.innerHTML = `${formatadoTotal} / ${formatadoPend} - Taxa de -`;
         }
 
-        // 4. Gestão de Pessoas
         preencherTexto('f_absenteismo', 'r_absenteismo');
         let efOp = document.getElementById('f_efetivo_op').value || '0';
         let lidOp = document.getElementById('f_lider_op').value || '0';
@@ -488,7 +498,6 @@
             document.getElementById('r_quadro_comp').innerHTML = `<span class="status-alert">Não (Falta: ${fOp} Op, ${fApac} Apac)</span>`;
         }
 
-        // 5. 5S
         preencherTexto('f_laminas', 'r_laminas');
 
         if(document.getElementById('f_5s').value === 'Não') {
@@ -500,7 +509,6 @@
             document.getElementById('r_5s_box').style.display = 'none';
         }
 
-        // 6. EHS (Lógica Combinada)
         let ehsAcidente = document.getElementById('f_ehs_acidente').value;
         let ehsIncidente = document.getElementById('f_ehs_incidente').value;
 
@@ -534,12 +542,22 @@
             }
         }
 
-        // 7. Last-Mile
+        // Lógica de Problemas de Desembaraço (Last-Mile)
+        let lmProb = document.getElementById('f_lm_prob').value;
+        if(lmProb === 'Sim') {
+            document.getElementById('r_lm_prob_status').innerHTML = `<span class="status-alert">Sim</span>`;
+            document.getElementById('r_lm_prob_box').style.display = 'flex';
+            document.getElementById('r_lm_prob_detalhe').innerText = document.getElementById('f_lm_detalhe').value || 'Nenhum detalhe informado.';
+        } else {
+            document.getElementById('r_lm_prob_status').innerHTML = `<span class="status-success">Não</span>`;
+            document.getElementById('r_lm_prob_box').style.display = 'none';
+        }
+
         let parseCarretas = (classe, containerId) => {
             let html = '';
             let subtotal = 0;
             document.querySelectorAll(classe).forEach((input, idx) => {
-                let val = parseInt(input.value) || 0;
+                let val = parseInt(input.value, 10) || 0;
                 subtotal += val;
                 html += `<div>- Carreta 0${idx+1}: <strong>${val.toLocaleString('pt-BR')}</strong> remessas</div>`;
             });
@@ -553,17 +571,31 @@
         parseCarretas('.calc-imile', 'r_lista_imile');
         document.getElementById('r_total_lm').innerText = calcularTotalLastMile().toLocaleString('pt-BR') + ' remessas';
 
-        // 8. Geração da Imagem
+        // Geração da Imagem Padronizada
         setTimeout(() => {
-            html2canvas(document.querySelector("#canvasArea"), { 
-                scale: 2, 
+            const elementoCanvas = document.querySelector("#canvasArea");
+            
+            html2canvas(elementoCanvas, { 
+                scale: 2,             
+                useCORS: true,        
+                allowTaint: true,     
+                width: 640,           
+                windowWidth: 640,     
                 scrollX: 0, 
                 scrollY: 0,
-                windowWidth: document.documentElement.offsetWidth,
-                windowHeight: document.documentElement.offsetHeight
+                onclone: function (documentoClonado) {
+                    const wrapperClonado = documentoClonado.getElementById('canvasWrapper');
+                    if (wrapperClonado) {
+                        wrapperClonado.style.position = 'absolute';
+                        wrapperClonado.style.left = '0';
+                        wrapperClonado.style.top = '0';
+                        wrapperClonado.style.zIndex = '9999';
+                        wrapperClonado.style.width = '640px';
+                    }
+                }
             }).then(canvas => {
                 canvas.toBlob(blob => {
-                    const nomeArquivo = 'relatorio_operacional_turno.png';
+                    const nomeArquivo = `Relatório ${document.getElementById('f_turno').value} ${new Date().toLocaleString('pt-BR').replace(/[\/:]/g, '-')}.png`;
                     
                     const urlDownload = URL.createObjectURL(blob);
                     const linkDownload = document.createElement('a');
