@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Evita o armazenamento em cache da página -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <title>Relatório Operacional de Turno</title>
     
     <!-- Importação das fontes idênticas para todos os sistemas (Força a mesma tipografia e emojis) -->
@@ -34,19 +40,34 @@
         
         .total-display { font-size: 16px; font-weight: bold; color: #28a745; margin-top: 10px; text-align: right; }
 
-        /* Correção para Mobile: Usando um wrapper invisível posicionado no topo da página */
+        /* Correção para Mobile: Usando um wrapper isolado para o print */
         #canvasWrapper {
-            position: absolute; top: 0; left: -9999px; z-index: -1;
+            position: absolute; 
+            top: 0; 
+            left: 0;
+            z-index: -100;
+            visibility: hidden;
+            pointer-events: none;
+            width: 0;
+            height: 0;
+            overflow: hidden;
         }
 
         /* Estilos da Imagem Gerada */
-        /* Força a mesma fonte e emojis na imagem gerada, independentemente do OS */
+        /* Força a mesma fonte, emojis e proíbe reescala de texto pelo mobile */
         #canvasArea { 
-            width: 580px; padding: 30px; 
-            background: #ffffff; border-radius: 10px; border-top: 8px solid #007bff;
+            width: 580px; 
+            padding: 30px; 
+            background: #ffffff; 
+            border-radius: 10px; 
+            border-top: 8px solid #007bff;
             box-shadow: 0 0 10px rgba(0,0,0,0.05); 
             font-family: 'Inter', 'Noto Color Emoji', sans-serif !important;
+            -webkit-text-size-adjust: 100%; /* Resolve bug de fonte gigante em iOS/Android */
+            text-size-adjust: 100%;
+            visibility: visible; /* Garante que o canvas veja o conteúdo */
         }
+        
         .header-img { text-align: center; color: #333; font-size: 20px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase;}
         .date-img { text-align: center; font-size: 12px; color: #888; margin-bottom: 20px; }
         .section-img { margin-bottom: 15px; }
@@ -63,6 +84,15 @@
         .rx-grid-report { display: flex; flex-direction: row; flex-wrap: nowrap; gap: 8px; align-items: center; }
         .rx-item { display: inline-flex; align-items: center; gap: 2px; font-weight: bold; font-size: 11px; white-space: nowrap; }
     </style>
+    
+    <!-- Script para garantir recarregamento caso venha de cache do botão voltar -->
+    <script>
+        window.addEventListener("pageshow", function (event) {
+            if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+                window.location.reload(true);
+            }
+        });
+    </script>
 </head>
 <body>
 
@@ -216,6 +246,7 @@
     </div>
 </div>
 
+<!-- O Wrapper agora está configurado para não atrapalhar o layout no celular -->
 <div id="canvasWrapper">
     <div id="canvasArea">
         <div class="header-img" id="r_titulo_turno">Relatório Operacional</div>
@@ -553,16 +584,17 @@
             document.getElementById('r_lm_prob_box').style.display = 'none';
         }
 
+        // Estilização atualizada para as carretas geradas
         let parseCarretas = (classe, containerId) => {
             let html = '';
             let subtotal = 0;
             document.querySelectorAll(classe).forEach((input, idx) => {
                 let val = parseInt(input.value, 10) || 0;
                 subtotal += val;
-                html += `<div>- Carreta 0${idx+1}: <strong>${val.toLocaleString('pt-BR')}</strong> remessas</div>`;
+                html += `<div style="font-size: 11px; font-weight: normal; color: #555;">- Carreta 0${idx+1}: <strong style="color: #111;">${val.toLocaleString('pt-BR')}</strong> remessas</div>`;
             });
             if (html === '') html = 'Nenhuma carreta registrada.';
-            else html += `<div style="margin-top:4px; font-size:12px; color:#555;">Subtotal: ${subtotal.toLocaleString('pt-BR')}</div>`;
+            else html += `<div style="margin-top:4px; font-size:11px; color:#555;">Subtotal: ${subtotal.toLocaleString('pt-BR')}</div>`;
             
             document.getElementById(containerId).innerHTML = html;
         };
@@ -575,12 +607,13 @@
         setTimeout(() => {
             const elementoCanvas = document.querySelector("#canvasArea");
             
+            // Configurações forçadas do html2canvas para ignorar DevicePixelRatio do Mobile
             html2canvas(elementoCanvas, { 
-                scale: 2,             
+                scale: 2, /* Força escala 2 independentemente se o aparelho é um tablet ou um celular pequeno */
                 useCORS: true,        
                 allowTaint: true,     
-                width: 640,           
-                windowWidth: 640,     
+                width: 640,            
+                windowWidth: 640, /* Engana o renderizador simulando sempre uma tela de 640px */     
                 scrollX: 0, 
                 scrollY: 0,
                 onclone: function (documentoClonado) {
@@ -591,6 +624,7 @@
                         wrapperClonado.style.top = '0';
                         wrapperClonado.style.zIndex = '9999';
                         wrapperClonado.style.width = '640px';
+                        wrapperClonado.style.visibility = 'visible';
                     }
                 }
             }).then(canvas => {
