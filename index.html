@@ -114,7 +114,9 @@
     <label>Qtd de equipamentos na pista:</label> <input type="number" id="f_equip_pista" placeholder="Ex: 5">
     <label>Qtd de equipamentos na importação:</label> <input type="number" id="f_equip_importacao" placeholder="Ex: 10">
     <label>Qtd de equipamentos recebidos (Total):</label> <input type="number" id="f_equip_recebidos" placeholder="Ex: 15">
-    <label>Qtd de AWBs despaletizadas:</label> <input type="number" id="f_awb_despaletizadas" placeholder="Ex: 10">
+    
+    <label>Qtd de PMCs despaletizados:</label> <input type="number" id="f_pmc_despaletizados" placeholder="Ex: 10">
+    <label>Qtd de PMCs dentro do armazem:</label> <input type="number" id="f_pmc_armazem" placeholder="Ex: 25">
     
     <label>AWBs em seleção?</label>
     <select id="f_awb_sel" onchange="toggleVisibilidade('f_awb_sel', 'box_awb_sel', 'Sim')">
@@ -263,8 +265,9 @@
             <div style="display: flex; justify-content: space-between; flex-wrap: wrap; background: #f9f9f9; padding: 6px 10px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 8px;">
                 <div style="width: 48%; margin-bottom: 4px; font-size: 12px; color: #444;">Equip. Pista: <span style="font-weight: bold; color: #111;" id="r_equip_pista">-</span></div>
                 <div style="width: 48%; margin-bottom: 4px; font-size: 12px; text-align: right; color: #444;">Equip. Importação: <span style="font-weight: bold; color: #111;" id="r_equip_importacao">-</span></div>
-                <div style="width: 48%; font-size: 12px; color: #444;">Total Recebidos: <span style="font-weight: bold; color: #111;" id="r_equip_recebidos">-</span></div>
-                <div style="width: 48%; font-size: 12px; text-align: right; color: #444;">AWBs Despaletizadas: <span style="font-weight: bold;" class="status-success" id="r_awb_despaletizadas">-</span></div>
+                <div style="width: 48%; margin-bottom: 4px; font-size: 12px; color: #444;">Total Recebidos: <span style="font-weight: bold; color: #111;" id="r_equip_recebidos">-</span></div>
+                <div style="width: 48%; margin-bottom: 4px; font-size: 12px; text-align: right; color: #444;">PMCs Despaletizados: <span style="font-weight: bold;" class="status-success" id="r_pmc_despaletizados">-</span></div>
+                <div style="width: 100%; font-size: 12px; color: #444; border-top: 1px solid #ddd; padding-top: 6px; margin-top: 2px; text-align: center;">PMCs dentro do armazem: <span style="font-weight: bold; color: #111;" id="r_pmc_armazem">-</span></div>
             </div>
             
             <div class="item-img" id="r_awb_combined" style="display: none;">AWBs Seleção / Problemas: <span class="item-val status-success">Não</span></div>
@@ -420,7 +423,8 @@
         preencherTexto('f_equip_pista', 'r_equip_pista');
         preencherTexto('f_equip_importacao', 'r_equip_importacao');
         preencherTexto('f_equip_recebidos', 'r_equip_recebidos');
-        preencherTexto('f_awb_despaletizadas', 'r_awb_despaletizadas');
+        preencherTexto('f_pmc_armazem', 'r_pmc_armazem');
+        preencherTexto('f_pmc_despaletizados', 'r_pmc_despaletizados');
 
         let awbSel = document.getElementById('f_awb_sel').value;
         let awbProb = document.getElementById('f_awb_prob').value;
@@ -573,7 +577,6 @@
             }
         }
 
-        // Lógica de Problemas de Desembaraço (Last-Mile)
         let lmProb = document.getElementById('f_lm_prob').value;
         if(lmProb === 'Sim') {
             document.getElementById('r_lm_prob_status').innerHTML = `<span class="status-alert">Sim</span>`;
@@ -584,7 +587,6 @@
             document.getElementById('r_lm_prob_box').style.display = 'none';
         }
 
-        // Estilização atualizada para as carretas geradas
         let parseCarretas = (classe, containerId) => {
             let html = '';
             let subtotal = 0;
@@ -603,17 +605,15 @@
         parseCarretas('.calc-imile', 'r_lista_imile');
         document.getElementById('r_total_lm').innerText = calcularTotalLastMile().toLocaleString('pt-BR') + ' remessas';
 
-        // Geração da Imagem Padronizada
         setTimeout(() => {
             const elementoCanvas = document.querySelector("#canvasArea");
             
-            // Configurações forçadas do html2canvas para ignorar DevicePixelRatio do Mobile
             html2canvas(elementoCanvas, { 
-                scale: 2, /* Força escala 2 independentemente se o aparelho é um tablet ou um celular pequeno */
+                scale: 2, 
                 useCORS: true,        
                 allowTaint: true,     
                 width: 640,            
-                windowWidth: 640, /* Engana o renderizador simulando sempre uma tela de 640px */     
+                windowWidth: 640,
                 scrollX: 0, 
                 scrollY: 0,
                 onclone: function (documentoClonado) {
