@@ -32,13 +32,10 @@
        .checkbox-group input { width: auto; margin: 0; }
 
        .hidden-field { display: none; padding-left: 10px; border-left: 3px solid #007bff; margin-top: 10px; }
-       .dynamic-list { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
 
        .btn-container { position: sticky; bottom: 0; background: white; padding: 10px 0; margin-top: 30px; border-top: 1px solid #eee; }
        button { width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3); }
        button:active { background: #0056b3; }
-       
-       .total-display { font-size: 16px; font-weight: bold; color: #28a745; margin-top: 10px; text-align: right; }
 
        /* Correção para Mobile: Usando um wrapper isolado para o print */
        #canvasWrapper {
@@ -77,16 +74,11 @@
        .status-alert { color: #d9534f; font-weight: bold;}
        .status-warn { color: #d39e00; font-weight: bold;}
        .status-success { color: #28a745; font-weight: bold; }
-       .truck-list-img { display: flex; flex-direction: column; width: 100%; margin-top: 5px; padding-left: 10px; border-left: 2px solid #ddd; }
-       
+
        /* Ajuste para o Raio-X ficar forçadamente em uma linha única */
        .rx-line-container { display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: space-between; width: 100%; }
        .rx-grid-report { display: flex; flex-direction: row; flex-wrap: nowrap; gap: 8px; align-items: center; }
        .rx-item { display: inline-flex; align-items: center; gap: 2px; font-weight: bold; font-size: 11px; white-space: nowrap; }
-
-       .insumos-group { display: flex; gap: 10px; }
-       .insumos-group input { width: 50%; }
-       .insumos-title { color: #555; margin-top: 20px; margin-bottom: 5px; font-size: 15px; border-bottom: 1px solid #ddd; padding-bottom: 4px; font-weight: bold; }
    </style>
    
    <!-- Script para garantir recarregamento caso venha de cache do botão voltar -->
@@ -174,52 +166,6 @@
        <label style="margin-top:0;">Horas de produção em:</label>
        <input type="number" id="f_rx_hrs_saca" placeholder="Saca (Ex: 2 horas)">
        <input type="number" id="f_rx_hrs_caixa" placeholder="Caixa de Papelão (Ex: 1.5 horas)">
-   </div>
-
-   <h3>🚚 Last-Mile</h3>
-   
-   <label>Problemas com o desembaraço?</label>
-   <select id="f_lm_prob" onchange="toggleVisibilidade('f_lm_prob', 'box_lm_prob', 'Sim')">
-       <option value="Não">Não</option>
-       <option value="Sim">Sim</option>
-   </select>
-   <div id="box_lm_prob" class="hidden-field">
-       <textarea id="f_lm_detalhe" rows="3" placeholder="Descreva os problemas (ex: Lentidão acima de 8h no desembaraço, Problemas no sistema da RFB)..."></textarea>
-   </div>
-
-   <label>Qtd de Carretas J&T:</label>
-   <input type="number" id="f_qtd_jt" placeholder="Ex: 2" min="0" oninput="gerarCamposCarretas('jt', 'J&T')">
-   <div id="container_jt" class="dynamic-list"></div>
-
-   <label>Qtd de Carretas iMile:</label>
-   <input type="number" id="f_qtd_imile" placeholder="Ex: 3" min="0" oninput="gerarCamposCarretas('imile', 'iMile')">
-   <div id="container_imile" class="dynamic-list"></div>
-
-   <div class="total-display">Total Last-Mile Expedido: <span id="lbl_total_lm">0</span> remessas</div>
-
-   <!-- Nova seção de Insumos -->
-   <div class="insumos-title">📦 Insumos Last-Mile (Laterais e Bases)</div>
-   
-   <label style="margin-top: 10px; color: #d9534f;">J&T - Enviados:</label>
-   <div class="insumos-group">
-       <input type="number" id="f_jt_lat_env" placeholder="Qtd Laterais">
-       <input type="number" id="f_jt_bas_env" placeholder="Qtd Bases">
-   </div>
-   <label style="margin-top: 5px; color: #28a745;">J&T - Recebidos:</label>
-   <div class="insumos-group">
-       <input type="number" id="f_jt_lat_rec" placeholder="Qtd Laterais">
-       <input type="number" id="f_jt_bas_rec" placeholder="Qtd Bases">
-   </div>
-
-   <label style="margin-top: 15px; color: #d9534f;">iMile - Enviados:</label>
-   <div class="insumos-group">
-       <input type="number" id="f_imile_lat_env" placeholder="Qtd Laterais">
-       <input type="number" id="f_imile_bas_env" placeholder="Qtd Bases">
-   </div>
-   <label style="margin-top: 5px; color: #28a745;">iMile - Recebidos:</label>
-   <div class="insumos-group">
-       <input type="number" id="f_imile_lat_rec" placeholder="Qtd Laterais">
-       <input type="number" id="f_imile_bas_rec" placeholder="Qtd Bases">
    </div>
 
    <h3>👥 Gestão de Pessoas</h3>
@@ -337,44 +283,6 @@
        </div>
 
        <div class="section-img">
-           <div class="section-title">🚚 Last-Mile</div>
-           
-           <div class="item-img" id="r_lm_prob_row">Problemas no desembaraço: <span class="item-val" id="r_lm_prob_status">-</span></div>
-           <div class="item-img" id="r_lm_prob_box" style="display: none; padding: 5px; background: #fdf5f5; border-left: 2px solid #d9534f; margin-top: 5px; margin-bottom: 10px; flex-direction: column;">
-               <em>Detalhes:</em> <span class="item-val" id="r_lm_prob_detalhe" style="text-align: left; font-weight: normal; font-size: 12px; margin-top: 3px; white-space: pre-wrap;">-</span>
-           </div>
-
-           <div class="item-img" style="flex-direction: column;">
-               <strong>J&T:</strong>
-               <div id="r_lista_jt" class="truck-list-img">Nenhuma carreta registrada.</div>
-           </div>
-           <div class="item-img" style="flex-direction: column;">
-               <strong>iMile:</strong>
-               <div id="r_lista_imile" class="truck-list-img">Nenhuma carreta registrada.</div>
-           </div>
-           <div class="item-img" style="margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 8px;">
-               <strong style="font-size: 15px;">TOTAL EXPEDIDO:</strong> <span class="item-val status-success" id="r_total_lm" style="font-size: 15px;">0 remessas</span>
-           </div>
-
-           <!-- Novo quadro de Insumos no relatório -->
-           <div class="item-img" style="margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 8px; flex-direction: column;">
-               <strong style="font-size: 14px; margin-bottom: 5px; color: #333;">📦 Controle de Insumos (Laterais / Bases):</strong>
-               <div style="display: flex; justify-content: space-between; background: #f9f9f9; padding: 8px; border-radius: 6px; border: 1px solid #eee; width: 100%; box-sizing: border-box;">
-                   <div style="width: 48%; font-size: 12px; color: #444;">
-                       <strong style="color: #111;">J&T</strong><br>
-                       <span style="display: inline-block; margin-top: 4px;">Enviados: <span style="font-weight: bold; color: #111;" id="r_jt_lat_env">0</span> Lat / <span style="font-weight: bold; color: #111;" id="r_jt_bas_env">0</span> Bas</span><br>
-                       <span style="display: inline-block; margin-top: 3px;">Recebidos: <span style="font-weight: bold; color: #111;" id="r_jt_lat_rec">0</span> Lat / <span style="font-weight: bold; color: #111;" id="r_jt_bas_rec">0</span> Bas</span>
-                   </div>
-                   <div style="width: 48%; font-size: 12px; color: #444;">
-                       <strong style="color: #111;">iMile</strong><br>
-                       <span style="display: inline-block; margin-top: 4px;">Enviados: <span style="font-weight: bold; color: #111;" id="r_imile_lat_env">0</span> Lat / <span style="font-weight: bold; color: #111;" id="r_imile_bas_env">0</span> Bas</span><br>
-                       <span style="display: inline-block; margin-top: 3px;">Recebidos: <span style="font-weight: bold; color: #111;" id="r_imile_lat_rec">0</span> Lat / <span style="font-weight: bold; color: #111;" id="r_imile_bas_rec">0</span> Bas</span>
-                   </div>
-               </div>
-           </div>
-       </div>
-
-       <div class="section-img">
            <div class="section-title">👥 Gestão de Pessoas</div>
            <div class="item-img">Absenteísmo (Faltas): <span class="item-val" id="r_absenteismo">-</span></div>
            <div class="item-img">Efetivo Operacional / Líder: <span class="item-val" id="r_op_geral">-</span></div>
@@ -426,26 +334,6 @@
        } else {
            alvo.style.display = 'none';
        }
-   }
-
-   function gerarCamposCarretas(empresaId, nomeExibicao) {
-       let qtd = parseInt(document.getElementById(`f_qtd_${empresaId}`).value, 10) || 0;
-       let container = document.getElementById(`container_${empresaId}`);
-       container.innerHTML = '';
-       
-       for(let i = 1; i <= qtd; i++) {
-           container.innerHTML += `<input type="number" class="calc-lm calc-${empresaId}" placeholder="${nomeExibicao} - Carreta ${i} (Qtd Remessas)" oninput="calcularTotalLastMile()">`;
-       }
-       calcularTotalLastMile();
-   }
-
-   function calcularTotalLastMile() {
-       let total = 0;
-       document.querySelectorAll('.calc-lm').forEach(input => {
-           total += parseInt(input.value, 10) || 0;
-       });
-       document.getElementById('lbl_total_lm').innerText = total.toLocaleString('pt-BR');
-       return total;
    }
 
    function preencherTexto(idOrigem, idDestino, fallback = '0') {
@@ -561,17 +449,6 @@
            elCombinadoRx.innerHTML = `${formatadoTotal} / ${formatadoPend} - Taxa de -`;
        }
 
-       // Processamento de Insumos Last-Mile
-       preencherTexto('f_jt_lat_env', 'r_jt_lat_env');
-       preencherTexto('f_jt_bas_env', 'r_jt_bas_env');
-       preencherTexto('f_jt_lat_rec', 'r_jt_lat_rec');
-       preencherTexto('f_jt_bas_rec', 'r_jt_bas_rec');
-
-       preencherTexto('f_imile_lat_env', 'r_imile_lat_env');
-       preencherTexto('f_imile_bas_env', 'r_imile_bas_env');
-       preencherTexto('f_imile_lat_rec', 'r_imile_lat_rec');
-       preencherTexto('f_imile_bas_rec', 'r_imile_bas_rec');
-
        preencherTexto('f_absenteismo', 'r_absenteismo');
        let efOp = document.getElementById('f_efetivo_op').value || '0';
        let lidOp = document.getElementById('f_lider_op').value || '0';
@@ -633,34 +510,6 @@
                document.getElementById('r_ehs_incidente_box').style.display = 'none';
            }
        }
-
-       let lmProb = document.getElementById('f_lm_prob').value;
-       if(lmProb === 'Sim') {
-           document.getElementById('r_lm_prob_status').innerHTML = `<span class="status-alert">Sim</span>`;
-           document.getElementById('r_lm_prob_box').style.display = 'flex';
-           document.getElementById('r_lm_prob_detalhe').innerText = document.getElementById('f_lm_detalhe').value || 'Nenhum detalhe informado.';
-       } else {
-           document.getElementById('r_lm_prob_status').innerHTML = `<span class="status-success">Não</span>`;
-           document.getElementById('r_lm_prob_box').style.display = 'none';
-       }
-
-       let parseCarretas = (classe, containerId) => {
-           let html = '';
-           let subtotal = 0;
-           document.querySelectorAll(classe).forEach((input, idx) => {
-               let val = parseInt(input.value, 10) || 0;
-               subtotal += val;
-               html += `<div style="font-size: 11px; font-weight: normal; color: #555;">- Carreta 0${idx+1}: <strong style="color: #111;">${val.toLocaleString('pt-BR')}</strong> remessas</div>`;
-           });
-           if (html === '') html = 'Nenhuma carreta registrada.';
-           else html += `<div style="margin-top:4px; font-size:11px; color:#555;">Subtotal: ${subtotal.toLocaleString('pt-BR')}</div>`;
-           
-           document.getElementById(containerId).innerHTML = html;
-       };
-
-       parseCarretas('.calc-jt', 'r_lista_jt');
-       parseCarretas('.calc-imile', 'r_lista_imile');
-       document.getElementById('r_total_lm').innerText = calcularTotalLastMile().toLocaleString('pt-BR') + ' remessas';
 
        setTimeout(() => {
            const elementoCanvas = document.querySelector("#canvasArea");
